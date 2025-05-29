@@ -1,0 +1,76 @@
+# This file is maintained automatically by "tofu init".
+# Manual edits may be lost in future updates.
+
+provider "registry.opentofu.org/hashicorp/local" {
+  version = "2.5.3"
+  hashes = [
+    "h1:31Clmfoe7hzkcdgwuhUuGuPGfeG2Ksk+YWcJgzBTN7M=",
+    "zh:32e1d4b0595cea6cda4ca256195c162772ddff25594ab4008731a2ec7be230bf",
+    "zh:48c390af0c87df994ec9796f04ec2582bcac581fb81ed6bb58e0671da1c17991",
+    "zh:4be7289c969218a57b40902e2f359914f8d35a7f97b439140cb711aa21e494bd",
+    "zh:4cf958e631e99ed6c8b522c9b22e1f1b568c0bdadb01dd002ca7dffb1c927764",
+    "zh:7a0132c0faca4c4c96aa70808effd6817e28712bf5a39881666ac377b4250acf",
+    "zh:7d60de08fac427fb045e4590d1b921b6778498eee9eb16f78c64d4c577bde096",
+    "zh:91003bee5981e99ec3925ce2f452a5f743827f9d0e131a86613549c1464796f0",
+    "zh:9fe2fe75977c8149e2515fb30c6cc6cfd57b225d4ce592c570d81a3831d7ffa3",
+    "zh:e210e6be54933ce93e03d0994e520ba289aa01b2c1f70e77afb8f2ee796b0fe3",
+    "zh:e8793e5f9422f2b31a804e51806595f335b827c9a38db18766960464566f21d5",
+  ]
+}
+
+provider "registry.opentofu.org/hashicorp/null" {
+  version = "3.2.4"
+  hashes = [
+    "h1:i+WKhUHL2REY5EGmiHjfUljJB8UKZ9QdhdM5uTeUhC4=",
+    "zh:1769783386610bed8bb1e861a119fe25058be41895e3996d9216dd6bb8a7aee3",
+    "zh:32c62a9387ad0b861b5262b41c5e9ed6e940eda729c2a0e58100e6629af27ddb",
+    "zh:339bf8c2f9733fce068eb6d5612701144c752425cebeafab36563a16be460fb2",
+    "zh:36731f23343aee12a7e078067a98644c0126714c4fe9ac930eecb0f2361788c4",
+    "zh:3d106c7e32a929e2843f732625a582e562ff09120021e510a51a6f5d01175b8d",
+    "zh:74bcb3567708171ad83b234b92c9d63ab441ef882b770b0210c2b14fdbe3b1b6",
+    "zh:90b55bdbffa35df9204282251059e62c178b0ac7035958b93a647839643c0072",
+    "zh:ae24c0e5adc692b8f94cb23a000f91a316070fdc19418578dcf2134ff57cf447",
+    "zh:b5c10d4ad860c4c21273203d1de6d2f0286845edf1c64319fa2362df526b5f58",
+    "zh:e05bbd88e82e1d6234988c85db62fd66f11502645838fff594a2ec25352ecd80",
+  ]
+}
+
+provider "registry.opentofu.org/hashicorp/tls" {
+  version     = "4.0.5"
+  constraints = "4.0.5"
+  hashes = [
+    "h1:LWGTWAUrC+/iTsNq0vxANvGOp+7Jnl4wAnSOW2Shqjc=",
+    "zh:05a7dc3ac92005485714f87541ad6d0d478988b478c5774227a7d39b01660050",
+    "zh:547e0def44080456169bf77c21037aa6dc9e7f3e644a8f6a2c5fc3e6c15cf560",
+    "zh:6842b03d050ae1a4f1aaed2a2b1ca707eae84ae45ae492e4bb57c3d48c26e1f1",
+    "zh:6ced0a9eaaba12377f3a9b08df2fd9b83ae3cb357f859eb6aecf24852f718d9a",
+    "zh:766bcdf71a7501da73d4805d05764dcb7c848619fa7c04b3b9bd514e5ce9e4aa",
+    "zh:84cc8617ce0b9a3071472863f43152812e5e8544802653f636c866ef96f1ed34",
+    "zh:b1939e0d44c89315173b78228c1cf8660a6924604e75ced7b89e45196ce4f45e",
+    "zh:ced317916e13326766427790b1d8946c4151c4f3b0efd8f720a3bc24abe065fa",
+    "zh:ec9ff3412cf84ba81ca88328b62c17842b803ef406ae19152c13860b356b259c",
+    "zh:ff064f0071e98702e542e1ce00c0465b7cd186782fe9ccab8b8830cac0f10dd4",
+  ]
+}
+
+provider "registry.opentofu.org/telmate/proxmox" {
+  version     = "3.0.1-rc9"
+  constraints = "3.0.1-rc9"
+  hashes = [
+    "h1:Hfq89BneXHIBa/Yo88EAcMI6aX4BYg+6TJKMgCXISkE=",
+    "zh:037bae31005419d5ca6921940fc572d5acba264f5b80a09f9e8cf14edff9c189",
+    "zh:0decfc022e6e40f6e4d5dd60073b6d62dc7ec582e2e398fb4a0cbc88c61b9389",
+    "zh:16024c6ee5d0fa9c7041f8197e854f73026fd06e8b19ec61e40291ef50171d8a",
+    "zh:4839fa10755023b26305d519b6ad2a8d83b5f83d3a8f58bc9ac9a7e6ed20cb6a",
+    "zh:6b50a44d20b5bfa62580f7cd00c64a7b47f9b9d5dd32a7392ca218e33f9bda07",
+    "zh:83f67ac118e4e2c0ad4d93c50f3f05a262724b374c9ad34342826a384d1ce284",
+    "zh:84e51f6bbff5b4e016fdb0f2b594672917e053fbd7b99612cfef7eebf1ca6465",
+    "zh:9fd6fe66507e8ebd4b462f53c8f4e898d12a6b4e8f0d38ad24ea8d5b04b3d7a9",
+    "zh:b3a6cbb5bc56c1ed658218a21aa1a864fcde0ce24eb07ae7735b4a327dbe833f",
+    "zh:bd9bfea930e43d47b65ed26254192e19584432227d64588ed280507ae46f2295",
+    "zh:d8cbc0e13477acf7bd85362a89a25ab377cbef566e7a1ddf4a577eebfd89de19",
+    "zh:e45d0fa9a895157c4ebc2faa6b7f8252351426bc06c09537a5d9a2a918b76b20",
+    "zh:f032d90900b00ed5a8d9d990cd382d3427366f1f394ccbd681a372f436a45b7c",
+    "zh:f54b2cfc0f26c2ad44b0eba1383642c1c27a5f1a3b1c167115196c818c3b94dd",
+  ]
+}

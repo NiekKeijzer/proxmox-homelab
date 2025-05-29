@@ -1,0 +1,18 @@
+[tools]
+opentofu = '1.9.1'
+ansible = "9.7.0"
+packer = "1.12.0"
+sops = "latest"
+age = "latest"
+
+[env]
+_.file = ".env.json"
+PKR_VAR_template_vmid = "9101"
+PKR_VAR_proxmox_api_user = "{{ env.PROXMOX_API_USER }}"
+PKR_VAR_proxmox_api_password = "{{ env.PROXMOX_API_PASSWORD }}"
+PKR_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
+PKR_VAR_proxmox_node = "{{ env.PROXMOX_NODE }}"
+
+[tasks.build-debian-image]
+description = "Build a Debian image with Packer"
+run = "packer build packer-templates/debian12"
