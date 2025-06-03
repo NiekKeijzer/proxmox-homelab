@@ -50,3 +50,6 @@ override.tf.json
 terraform.rc
 
 .idea/
+generated/
+bin/
+!bin/.gitkeep

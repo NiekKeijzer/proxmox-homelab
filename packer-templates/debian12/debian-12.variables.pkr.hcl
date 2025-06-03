@@ -13,6 +13,12 @@ variable "iso_storage_pool" {
   default = "iso-store"
 }
 
+variable "template_name" {
+  type        = string
+  default     = "pckr-tmpl-debian-12"
+  description = "Name of the Proxmox template to create"
+}
+
 variable "template_vmid" {
   type        = string
   default     = "9100"

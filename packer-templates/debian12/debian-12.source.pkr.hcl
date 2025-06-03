@@ -5,7 +5,7 @@ source "proxmox-iso" "debian-12" {
   insecure_skip_tls_verify = true  # Set to true for self-signed certificates
   node        = var.proxmox_node
 
-  template_name        = "pckr-tmpl-debian-12"
+  template_name        = var.template_name
   template_description = "Debian 12 Bookworm Packer Template -- Created: ${formatdate("YYYY-MM-DD hh:mm:ss ZZZ", timestamp())}"
   vm_id                = var.template_vmid
   # tags                  = "debian;debian-12;bookworm;packer;template"

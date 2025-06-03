@@ -1,6 +1,17 @@
 build {
   sources = ["source.proxmox-iso.debian-12"]
 
+  # Install cloud-init and qemu-guest-agent (and other utilities)
+  provisioner "shell" {
+    inline = [
+      "apt update",
+      "apt -y upgrade",
+      "apt -y install qemu-guest-agent cloud-init sudo curl",
+      "systemctl enable qemu-guest-agent",
+      "systemctl start qemu-guest-agent"
+    ]
+  }
+
   # Clean up the machine for cloud-init
   provisioner "shell" {
     inline = [

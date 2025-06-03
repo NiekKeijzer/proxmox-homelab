@@ -7,12 +7,69 @@ age = "latest"
 
 [env]
 _.file = ".env.json"
-PKR_VAR_template_vmid = "9101"
+_.path = [
+    "./bin"
+]
+
+PROXMOX_DEBIAN_TEMPLATE = "pckr-tmpl-debian-12"
+
+PKR_VAR_template_name = "{{ env.PROXMOX_DEBIAN_TEMPLATE }}"
+PKR_VAR_template_vmid = "9000"
 PKR_VAR_proxmox_api_user = "{{ env.PROXMOX_API_USER }}"
 PKR_VAR_proxmox_api_password = "{{ env.PROXMOX_API_PASSWORD }}"
 PKR_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
 PKR_VAR_proxmox_node = "{{ env.PROXMOX_NODE }}"
 
-[tasks.build-debian-image]
+TF_VAR_template_name = "{{ env.PROXMOX_DEBIAN_TEMPLATE }}"
+TF_VAR_proxmox_api_user = "{{ env.PROXMOX_API_USER }}"
+TF_VAR_proxmox_api_password = "{{ env.PROXMOX_API_PASSWORD }}"
+TF_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
+
+[hooks]
+enter = "mise run project:build:bin"
+
+[tasks."project:build:bin"]
+hide = true
+silent = true
+description = "Builds the bin directory, containing symlinks to the tools"
+run = """
+  # This is a workaround to ensure to ensure tools that are looking for `terraform` in the PATH
+  # actually find the OpenTofu binary. Fingers crossed the API will not change in the future.
+  ln -sf $(mise which tofu) ./bin/terraform
+"""
+
+[tasks."packer:build:debian12"]
 description = "Build a Debian image with Packer"
 run = "packer build packer-templates/debian12"
+
+[tasks."tofu:init"]
+description = "Initializes a OpenTofu working directory"
+run = "tofu -chdir=infra init"
+
+[tasks."tofu:plan"]
+description = "Generates an execution plan for OpenTofu"
+run = "tofu -chdir=infra plan -out tfplan"
+
+[tasks."tofu:apply"]
+description = "Applies the changes required to reach the desired state of the configuration"
+run = "tofu -chdir=infra apply tfplan"
+
+[tasks."tofu:refresh"]
+description = "Updates the state file with the real infrastructure"
+run = "tofu -chdir=infra refresh"
+
+[tasks."tofu:destroy"]
+description = "Destroy OpenTofu-managed infrastructure"
+run = "tofu -chdir=infra destroy"
+
+[tasks."tofu:validate"]
+description = "Validates the OpenTofu files"
+run = "tofu -chdir=infra validate"
+
+[tasks."tofu:format"]
+description = "Formats the OpenTofu files"
+run = "tofu -chdir=infra fmt"
+
+[tasks."tofu:check"]
+description = "Checks the OpenTofu files"
+depends = ["tofu:format", "tofu:validate"]
