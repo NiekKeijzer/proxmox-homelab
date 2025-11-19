@@ -1,12 +1,10 @@
 [tools]
 opentofu = '1.9.1'
-ansible = "9.7.0"
+"pipx:ansible" = "9.7.0"
 packer = "1.12.0"
-sops = "latest"
-age = "latest"
+dasel = "2.8.1"
 
 [env]
-_.file = ".env.json"
 _.path = [
     "./bin"
 ]
@@ -37,6 +35,41 @@ run = """
   # actually find the OpenTofu binary. Fingers crossed the API will not change in the future.
   ln -sf $(mise which tofu) ./bin/terraform
 """
+
+[tasks."fnox:age:generate-key"]
+description = "Generates a new Age key pair"
+run = """
+age-keygen -o 
+if [ ! -f ~/.config/fnox/age.txt ]; then
+  age-keygen -o ~/.config/fnox/age.txt
+else
+  echo "Age key pair already exists"
+fi
+"""
+
+[tasks."fnox:age:show-public-key"]
+description = "Shows the public Age key"
+run = "age-keygen -y ~/.config/fnox/age.txt"
+
+[tasks."fnox:age:add-public-key"]
+description = "Adds the public Age key to the fnox recipients"
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+  echo "Usage: mise run fnox:age:add-public-key <public-key>"
+  exit 1
+fi
+
+if [ $(grep -c "$1" fnox.toml) -ne 0 ]; then
+  echo "Public key already exists in fnox.toml"
+  exit 0
+fi
+
+dasel put -t string -f fnox.toml -v "$1" 'providers.age.recipients.[]'
+"""
+
 
 [tasks."packer:build:debian12"]
 description = "Build a Debian image with Packer"
