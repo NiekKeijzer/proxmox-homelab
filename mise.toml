@@ -1,13 +1,14 @@
 [tools]
 opentofu = '1.9.1'
-"pipx:ansible" = "9.7.0"
 packer = "1.12.0"
 dasel = "2.8.1"
+pipx = "1.8.0"
+ansible = "13.0.0"
 
 [env]
-_.path = [
-    "./bin"
-]
+_.path = ["./bin"]
+
+TF_INPUT = 0
 
 PROXMOX_DEBIAN_TEMPLATE = "pckr-tmpl-debian-12"
 
@@ -25,6 +26,7 @@ TF_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
 
 [hooks]
 enter = "mise run project:build:bin"
+postinstall = "mise run project:dependencies"
 
 [tasks."project:build:bin"]
 hide = true
@@ -35,6 +37,15 @@ run = """
   # actually find the OpenTofu binary. Fingers crossed the API will not change in the future.
   ln -sf $(mise which tofu) ./bin/terraform
 """
+
+[tasks."project:dependencies"]
+hide = true
+silent = true
+description = "Installs project dependencies not managed by Mise"
+depends = [
+  "ansible:install",
+  "tofu:init"
+]
 
 [tasks."fnox:age:generate-key"]
 description = "Generates a new Age key pair"
@@ -75,6 +86,7 @@ dasel put -t string -f fnox.toml -v "$1" 'providers.age.recipients.[]'
 description = "Build a Debian image with Packer"
 run = "packer build packer-templates/debian12"
 
+# TODO: Ideally -chdir would be set once for all OpenTofu tasks. However, TF_CLI_ARGS can only be used for subcommands
 [tasks."tofu:init"]
 description = "Initializes a OpenTofu working directory"
 run = "tofu -chdir=infra init"
@@ -106,3 +118,11 @@ run = "tofu -chdir=infra fmt"
 [tasks."tofu:check"]
 description = "Checks the OpenTofu files"
 depends = ["tofu:format", "tofu:validate"]
+
+[tasks."ansible:install"]
+description = "Installs Ansible roles and collections"
+run = "ansible-galaxy install -r playbooks/requirements.yaml"
+
+[tasks."ansible:inventory"]
+description = "Lists thee Ansible inventory"
+run = "ansible-inventory -i playbooks/inventory --list"

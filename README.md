@@ -17,7 +17,7 @@ mise run fnox:age:generate-key
 ```
 
 On a previously added machine run 
-
+m
 ```bash
 mise run fnox:age:show-public-key
 mise run fnox:age:add-public-key <public-key>
