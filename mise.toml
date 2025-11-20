@@ -8,20 +8,24 @@ ansible = "13.0.0"
 [env]
 _.path = ["./bin"]
 
-TF_INPUT = 0
-
+# Shared configuration
 PROXMOX_DEBIAN_TEMPLATE = "pckr-tmpl-debian-12"
 
+# Packer environment variables
 PKR_VAR_template_name = "{{ env.PROXMOX_DEBIAN_TEMPLATE }}"
 PKR_VAR_template_vmid = "9000"
-PKR_VAR_proxmox_api_user = "{{ env.PROXMOX_API_USER }}"
-PKR_VAR_proxmox_api_password = "{{ env.PROXMOX_API_PASSWORD }}"
+PKR_VAR_proxmox_api_token_id = "{{ env.PROXMOX_PKR_API_TOKEN_SECRET }}"
+PKR_VAR_proxmox_api_token_secret = "{{ env.PROXMOX_PKR_API_TOKEN_ID }}"
 PKR_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
 PKR_VAR_proxmox_node = "{{ env.PROXMOX_NODE }}"
 
+# OpenTofu / Terraform environment variables
+TF_INPUT = 0
+TF_LOG = "ERROR"
+
 TF_VAR_template_name = "{{ env.PROXMOX_DEBIAN_TEMPLATE }}"
-TF_VAR_proxmox_api_user = "{{ env.PROXMOX_API_USER }}"
-TF_VAR_proxmox_api_password = "{{ env.PROXMOX_API_PASSWORD }}"
+TF_VAR_proxmox_api_token_id = "{{ env.PROXMOX_TF_API_TOKEN_ID }}"
+TF_VAR_proxmox_api_token_secret = "{{ env.PROXMOX_TF_API_TOKEN_SECRET }}"
 TF_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
 
 [hooks]

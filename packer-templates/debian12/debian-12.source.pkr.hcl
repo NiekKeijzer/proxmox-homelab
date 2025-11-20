@@ -1,14 +1,14 @@
 source "proxmox-iso" "debian-12" {
-  proxmox_url = "https://${var.proxmox_host}:8006/api2/json"
-  username    = var.proxmox_api_user
-  password    = var.proxmox_api_password
+  proxmox_url = "https://${var.proxmox_host}:${var.proxmox_port}/api2/json"
+  username    = var.proxmox_api_token_id
+  token       = var.proxmox_api_token_secret
   insecure_skip_tls_verify = true  # Set to true for self-signed certificates
   node        = var.proxmox_node
 
   template_name        = var.template_name
   template_description = "Debian 12 Bookworm Packer Template -- Created: ${formatdate("YYYY-MM-DD hh:mm:ss ZZZ", timestamp())}"
   vm_id                = var.template_vmid
-  # tags                  = "debian;debian-12;bookworm;packer;template"
+  tags                  = "debian;debian-12;bookworm;packer;template"
 
   os                      = "l26"
   cpu_type                = var.cpu_type
