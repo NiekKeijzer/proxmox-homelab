@@ -13,9 +13,8 @@ PROXMOX_DEBIAN_TEMPLATE = "pckr-tmpl-debian-12"
 
 # Packer environment variables
 PKR_VAR_template_name = "{{ env.PROXMOX_DEBIAN_TEMPLATE }}"
-PKR_VAR_template_vmid = "9000"
-PKR_VAR_proxmox_api_token_id = "{{ env.PROXMOX_PKR_API_TOKEN_SECRET }}"
-PKR_VAR_proxmox_api_token_secret = "{{ env.PROXMOX_PKR_API_TOKEN_ID }}"
+PKR_VAR_proxmox_api_token_id = "{{ env.PROXMOX_PKR_API_TOKEN_ID }}"
+PKR_VAR_proxmox_api_token_secret = "{{ env.PROXMOX_PKR_API_TOKEN_SECRET }}"
 PKR_VAR_proxmox_host = "{{ env.PROXMOX_HOST }}"
 PKR_VAR_proxmox_node = "{{ env.PROXMOX_NODE }}"
 
@@ -47,8 +46,9 @@ hide = true
 silent = true
 description = "Installs project dependencies not managed by Mise"
 depends = [
+  "packer:init",
+  "tofu:init",
   "ansible:install",
-  "tofu:init"
 ]
 
 [tasks."fnox:age:generate-key"]
@@ -85,10 +85,19 @@ fi
 dasel put -t string -f fnox.toml -v "$1" 'providers.age.recipients.[]'
 """
 
+[tasks."packer:init"]
+description = "Initializes Packer templates"
+run = "find ./packer-templates -type d -mindepth 1 -maxdepth 1 -exec packer init {} \\;"
 
-[tasks."packer:build:debian12"]
+[tasks."packer:build:all"]
+description = "Build all Packer images"
+depends = [
+  "packer:build:debian13"
+]
+
+[tasks."packer:build:debian13"]
 description = "Build a Debian image with Packer"
-run = "packer build packer-templates/debian12"
+run = "packer build -var-file=packer-templates/debian-13.pkrvars.hcl packer-templates/debian"
 
 # TODO: Ideally -chdir would be set once for all OpenTofu tasks. However, TF_CLI_ARGS can only be used for subcommands
 [tasks."tofu:init"]
