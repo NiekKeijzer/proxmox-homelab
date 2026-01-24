@@ -5,6 +5,8 @@ resource "tls_private_key" "provision_ssh_key" {
 
 locals {
   generated_files = "${path.root}/generated"
+
+  docker_vm_count = 1
 }
 
 resource "local_sensitive_file" "provision_ssh_key" {
@@ -12,47 +14,79 @@ resource "local_sensitive_file" "provision_ssh_key" {
   content  = tls_private_key.provision_ssh_key.private_key_openssh
 }
 
-module "k3s_server_vms" {
-  source = "./modules/qemu_vms"
+resource "proxmox_virtual_environment_vm" "docker_vm" {
+  count       = local.docker_vm_count
+  name        = format("docker-%02s", count.index + 1)
+  description = "Managed by OpenTofu"
+  tags        = ["opentofu", "docker", "debian", "debian-13"]
+  node_name   = var.proxmox_node
 
-  vm_count = 3
-  vm_prefix = "k3s-server-"
+  stop_on_destroy = true
 
-  provision_user = var.provision_user
-  provision_ssh_public_key = tls_private_key.provision_ssh_key.public_key_openssh
+  agent {
+    enabled = true
+  }
 
-  proxmox_node = var.proxmox_node
+  clone {
+    vm_id = var.proxmox_template_vm_id
+  }
 
-  base_ip = "192.168.1.200"
-  gateway = var.gateway
+  cpu {
+    cores = 1
+  }
+
+  memory {
+    dedicated = 12288
+  }
+
+  initialization {
+    ip_config {
+      ipv4 {
+        address = "192.168.20.${20 + count.index}/24"
+        gateway = var.gateway
+      }
+    }
+
+    dns {
+      servers = ["1.1.1.1"]
+    }
+
+    user_account {
+      username = var.provision_user
+      password = "password"
+      keys     = [tls_private_key.provision_ssh_key.public_key_openssh]
+    }
+  }
+
+  disk {
+    size      = 20
+    interface = "virtio0"
+    iothread  = true
+    discard   = "on"
+  }
+
+  network_device {
+    bridge  = "vmbr0"
+    vlan_id = var.vlan_id
+    model   = "virtio"
+  }
+
+  operating_system {
+    type = "l26"
+  }
 }
 
-module "k3s_agent_vms" {
-  source = "./modules/qemu_vms"
+resource "ansible_host" "docker" {
+  depends_on = [proxmox_virtual_environment_vm.docker_vm]
 
-  vm_count = 0
-  vm_prefix = "k3s-agent-"
+  count = local.docker_vm_count
 
-  provision_user = var.provision_user
-  provision_ssh_public_key = tls_private_key.provision_ssh_key.public_key_openssh
+  groups = ["docker", ]
 
-  proxmox_node = var.proxmox_node
-
-  base_ip = "192.168.1.210"
-  gateway = var.gateway
-}
-
-# Add the created VMs to Ansible inventory
-resource "ansible_host" "k3s_server" {
-  depends_on = [module.k3s_server_vms]
-  for_each = module.k3s_server_vms.vm
-  groups = ["k3s", "k3s_server"]
-
-  name = each.key
-
+  name = proxmox_virtual_environment_vm.docker_vm[count.index].name
   variables = {
-    ansible_host = each.value.ipv4_address
-    ansible_user = var.provision_user
+    ansible_host                 = proxmox_virtual_environment_vm.docker_vm[count.index].ipv4_addresses[1][0]
+    ansible_user                 = var.provision_user
     ansible_ssh_private_key_file = abspath(local_sensitive_file.provision_ssh_key.filename)
   }
 }

@@ -7,6 +7,10 @@ variable "proxmox_port" {
   type = number
 }
 
+variable "proxmox_template_vm_id" {
+  default = "9001"
+}
+
 variable "proxmox_api_token_id" {
   type = string
 }
@@ -27,5 +31,10 @@ variable "provision_user" {
 
 variable "gateway" {
   type = string
-  default = "192.168.1.1"
+  default = "192.168.20.1"
+}
+
+variable "vlan_id" {
+  type = number
+  default = 20
 }
