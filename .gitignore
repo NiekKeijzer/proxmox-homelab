@@ -53,3 +53,7 @@ terraform.rc
 generated/
 bin/
 !bin/.gitkeep
+
+# Ansible 
+playbooks/galaxy/
+!playbooks/galaxy/.gitkeep

@@ -102,7 +102,7 @@ run = "packer build -var-file=packer-templates/debian-13.pkrvars.hcl packer-temp
 # TODO: Ideally -chdir would be set once for all OpenTofu tasks. However, TF_CLI_ARGS can only be used for subcommands
 [tasks."tofu:init"]
 description = "Initializes a OpenTofu working directory"
-run = "tofu -chdir=infra init"
+run = "tofu -chdir=infra init -upgrade"
 
 [tasks."tofu:plan"]
 description = "Generates an execution plan for OpenTofu"
@@ -138,4 +138,8 @@ run = "ansible-galaxy install -r playbooks/requirements.yaml"
 
 [tasks."ansible:inventory"]
 description = "Lists thee Ansible inventory"
-run = "ansible-inventory -i playbooks/inventory --list"
+run = "ansible-inventory --list"
+
+[tasks."ansible:run:main"]
+description = "Runs the Ansible playbook"
+run = "ansible-playbook -i playbooks/inventory.yaml playbooks/main.yaml"

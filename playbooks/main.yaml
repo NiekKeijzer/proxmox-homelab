@@ -1,0 +1,18 @@
+---
+- hosts: all
+  roles: 
+    - role: geerlingguy.security
+      security_sudoers_passwordless: ['mrrobot']
+      security_autoupdate_enabled: true
+
+- hosts: docker
+  roles: 
+    - role: geerlingguy.firewall
+      firewall_allowed_tcp_ports:
+        - 22
+        - 80
+        - 443
+    - role: geerlingguy.docker
+      docker_users:
+        - mrrobot
+      docker_install_compose_plugin: true
