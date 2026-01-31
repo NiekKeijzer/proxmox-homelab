@@ -5,6 +5,22 @@
       security_sudoers_passwordless: ['mrrobot']
       security_autoupdate_enabled: true
 
+- hosts: dns
+  roles: 
+    - role: geerlingguy.firewall
+      firewall_allowed_tcp_ports:
+        - 22
+        - 53
+        - 80
+        - 443
+        # Health check
+        - 8080 
+        # Metrics
+        - 9153
+      firewall_allowed_udp_ports:
+        - 53
+    - role: coredns
+
 - hosts: docker
   roles: 
     - role: geerlingguy.firewall

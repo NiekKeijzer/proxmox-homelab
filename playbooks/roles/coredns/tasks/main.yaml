@@ -1,0 +1,108 @@
+--- 
+- name: Create CoreDNS users
+  ansible.builtin.user:
+    name: coredns
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create CoreDNS configuration directories 
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ coredns_user}}"
+    group: "{{ coredns_group }}"
+    mode: '0755'
+  loop:
+    - "{{ coredns_install_dir }}"
+    - "{{ coredns_config_dir }}"
+    - "{{ coredns_config_dir }}/zones"
+
+- name: Download CoreDNS binary
+  ansible.builtin.get_url:
+    url: "https://github.com/coredns/coredns/releases/download/v{{ coredns_version }}/coredns_{{ coredns_version }}_linux_amd64.tgz"
+    dest: "/tmp/coredns.tgz"
+    mode: '0644'
+
+- name: Extract CoreDNS binary
+  ansible.builtin.unarchive:
+    src: "/tmp/coredns.tgz"
+    dest: "{{ coredns_install_dir }}"
+    remote_src: yes
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0755'
+
+- name: Generate auto zone file from inventory
+  template:
+    src: templates/auto_zone.j2
+    dest: "{{ coredns_config_dir }}/zones/{{ auto_zone_name }}.zone"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+  when: auto_zone_enabled
+  notify: reload coredns
+
+- name: Generate custom zone files from templates
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ coredns_config_dir }}/zones/{{ item.zone_file }}"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+  loop: "{{ custom_zones }}"
+  when: custom_zones is defined and custom_zones | length > 0
+  notify: reload coredns
+
+- name: Generate CoreDNS configuration file
+  ansible.builtin.template:
+    src: "Corefile.j2"
+    dest: "{{ coredns_config_dir }}/Corefile"
+    owner: "{{ coredns_user }}"
+    group: "{{ coredns_group }}"
+    mode: '0644'
+  notify: reload coredns
+
+- name: Generate systemd service file for CoreDNS
+  ansible.builtin.template:
+    src: "coredns.service.j2"
+    dest: "/etc/systemd/system/coredns.service"
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart coredns
+
+- name: Set capability for binding to privileged ports
+  community.general.capabilities:
+    path: "{{ coredns_install_dir }}/coredns"
+    capability: 'cap_net_bind_service=+ep'
+    state: present
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+
+- name: Enable and start CoreDNS service
+  ansible.builtin.systemd:
+    name: coredns
+    enabled: yes
+    state: started
+
+- name: Wait for CoreDNS to be ready
+  wait_for:
+    port: "{{ coredns_port }}"
+    timeout: 30
+
+- name: Verify CoreDNS is running
+  uri:
+    url: "http://localhost:{{ coredns_health_port }}/health"
+    method: GET
+    status_code: 200
+  register: health_check
+  retries: 3
+  delay: 5
+
+- name: Clean up temporary CoreDNS archive
+  ansible.builtin.file:
+    path: "/tmp/coredns.tgz"
+    state: absent
