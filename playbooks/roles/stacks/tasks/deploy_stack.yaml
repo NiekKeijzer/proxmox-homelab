@@ -1,0 +1,27 @@
+- name: Set stack directory path
+  set_fact:
+    stack_dir: "{{ playbook_dir | dirname }}/stacks/{{ stack }}"
+    stack_vm_dir: "{{ stack_root }}/{{ stack }}"
+
+- name: Create stack directory 
+  ansible.builtin.file:
+    path: "{{ stack_vm_dir }}"
+    state: directory
+    mode: '0744'
+  
+- name: Upload {{ stack }} stack files
+  ansible.builtin.copy:
+    src: "{{ stack_dir }}/"
+    dest: "{{ stack_vm_dir }}"
+    owner: mrrobot
+    group: docker
+    directory_mode: '0744'
+
+- name: Deploy stack secrets 
+  import_tasks: deploy_secrets.yaml
+
+- name: Deploy stack using Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ stack_vm_dir }}"
+    state: present
+    recreate: "always" 

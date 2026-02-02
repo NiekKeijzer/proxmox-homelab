@@ -1,0 +1,14 @@
+--- 
+- name: Create external Docker networks
+  community.docker.docker_network:
+    name: "{{ item.name }}"
+    driver: "{{ item.driver | default('bridge') }}"
+    driver_options: "{{ item.driver_options | default({}) }}"
+    state: present
+  with_items: "{{ docker_networks_external }}"
+
+- name: Deploy stack(s)
+  include_tasks: deploy_stack.yaml
+  loop: "{{ docker_stacks }}"
+  loop_control:
+    loop_var: stack

@@ -76,5 +76,7 @@ resource "ansible_host" "docker" {
     ansible_host                 = proxmox_virtual_environment_vm.docker_vm[count.index].ipv4_addresses[1][0]
     ansible_user                 = var.provision_user
     ansible_ssh_private_key_file = abspath(local_sensitive_file.provision_ssh_key.filename)
+
+    ipv6_address = proxmox_virtual_environment_vm.docker_vm[count.index].ipv6_addresses[1][0]
   }
 }

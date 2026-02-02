@@ -57,3 +57,6 @@ bin/
 # Ansible 
 playbooks/galaxy/
 !playbooks/galaxy/.gitkeep
+
+# Stacks - ignore sensitive config files
+stacks/**/secrets/

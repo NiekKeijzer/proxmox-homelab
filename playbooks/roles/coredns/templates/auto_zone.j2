@@ -41,3 +41,28 @@ ns{{ loop.index }} IN A {{ hostvars[host]['ansible_default_ipv4']['address'] }}
 {% endfor %}
 {% endif %}
 {% endfor %}
+
+{% if auto_zone_wildcard_domains is defined and auto_zone_wildcard_domains | length > 0 %}
+; Wildcard DNS Records
+{% for wildcard in auto_zone_wildcard_domains %}
+
+; Wildcard for {{ wildcard.domain }}
+{% set wc_domain = wildcard.domain %}
+{% set wc_ips = [] %}
+
+{# Collect IPs from specific hosts list #}
+{% if wildcard.hosts is defined and wildcard.hosts | length > 0 %}
+    {% for hostname in wildcard.hosts %}
+        {% if hostvars[hostname] is defined and hostvars[hostname]['ansible_default_ipv4']['address'] is defined %}
+            {% set _ = wc_ips.append(hostvars[hostname]['ansible_default_ipv4']['address']) %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{# Generate wildcard records #}
+{% for ip in wc_ips %}
+*.{{ wc_domain }} IN A {{ ip }}
+{% endfor %}
+{% endfor %}
+{% endif %}
+
