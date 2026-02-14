@@ -20,6 +20,13 @@
       firewall_allowed_udp_ports:
         - 53
     - role: coredns
+      vars: 
+        # Create wildcard DNS for services in the auto generated zone
+        # *.svc.burrow.casa pointing to docker-01 IP
+        auto_zone_wildcard_domains:
+          - domain: svc
+            hosts: 
+              - docker-01
 
 - hosts: docker
   roles: 
@@ -28,7 +35,12 @@
         - 22
         - 80
         - 443
+      firewall_additional_rules:
+        - "iptables -I INPUT -i docker0 -j ACCEPT"
+        - "iptables -I FORWARD -i docker0 -j ACCEPT"
+        - "iptables -I FORWARD -o docker0 -j ACCEPT"
     - role: geerlingguy.docker
       docker_users:
         - mrrobot
       docker_install_compose_plugin: true
+      docker_restart_handler_state: restarted

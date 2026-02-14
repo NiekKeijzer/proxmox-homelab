@@ -1,0 +1,43 @@
+- name: "{{ stack_name }} | Create stack directory "
+  ansible.builtin.file:
+    path: "{{ stack_vm_dir }}"
+    state: directory
+    mode: '0744'
+  
+- name: "{{ stack_name }} | Upload stack files"
+  ansible.builtin.copy:
+    src: "{{ stack_dir }}/"
+    dest: "{{ stack_vm_dir }}"
+    owner: mrrobot
+    group: docker
+    directory_mode: '0744'
+
+- name: "{{ stack_name }} | Check if stack defines secrets"
+  block: 
+    - name: "{{ stack_name }} | Read docker-compose.yaml"
+      ansible.builtin.slurp:
+        src: "{{ stack_dir }}/docker-compose.yaml"
+      delegate_to: localhost
+      become: false
+      register: _compose_raw
+
+    - name: "{{ stack_name }} | Parse docker-compose.yml"
+      ansible.builtin.set_fact:
+        compose: "{{ _compose_raw.content | b64decode | from_yaml }}"
+
+    - name: "{{ stack_name }} | Deploy stack secrets "
+      ansible.builtin.include_tasks: deploy_service_secrets.yaml
+      vars: 
+        secrets: "{{ compose.secrets }}"
+        service: "{{ item }}"
+        service_name: "{{ item.key }}"
+        service_config: "{{ item.value }}"
+      loop: "{{ compose.services | dict2items }}"
+      when: 
+        - compose.secrets is defined
+
+- name: "{{ stack_name }} | Deploy stack using Docker Compose"
+  community.docker.docker_compose_v2:
+    project_src: "{{ stack_vm_dir }}"
+    state: present
+    recreate: "always" 
