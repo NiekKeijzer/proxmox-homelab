@@ -1,0 +1,61 @@
+--- 
+networks:
+  proxy: 
+    external: true
+  monitoring:
+    driver: bridge
+
+services: 
+  victoriametrics: 
+    image: victoriametrics/victoria-metrics:v1.135.0
+    restart: unless-stopped
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/victoriametrics:/var/lib/victoriametrics:rw
+    networks: 
+      - proxy
+      - monitoring
+    ports:
+      - 8428:8428
+    command: 
+      - "-storageDataPath=/var/lib/victoriametrics"
+      - "-retentionPeriod=1y"
+      - "-httpListenAddr=:8428"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.victoria-metrics.rule=Host(`metrics.svc.burrow.casa`)"
+      - "traefik.http.routers.victoria-metrics.entrypoints=websecure"
+      - "traefik.http.services.victoria-metrics.loadbalancer.server.port=8428"
+
+  vmagent: 
+    image: victoriametrics/vmagent:v1.135.0
+    restart: unless-stopped
+    volumes: 
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/vmagent:/etc/vmagent:ro
+      - ./data/vmagent:/var/lib/vmagent:rw
+    networks: 
+      - proxy
+      - monitoring
+    command: 
+      - "-promscrape.config=/etc/vmagent/prometheus.yaml"
+      - "-remoteWrite.url=http://victoriametrics:8428/api/v1/write"
+    depends_on:
+      - victoriametrics
+
+  grafana: 
+    image: grafana/grafana-oss:12.3.2
+    restart: unless-stopped
+    user: '1000'
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./data/grafana:/var/lib/grafana:rw
+    networks:
+      - proxy
+      - monitoring
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana.svc.burrow.casa
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.svc.burrow.casa`)"
